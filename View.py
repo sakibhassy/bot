@@ -1,7 +1,4 @@
-import requests
-import time
-import random
-import math
+import requests, time, random, math
 
 API_KEY = "bd6f3409a32b27d0c2a48127f6baa7fe"
 API_URL = "https://smmgen.com/api/v2"
@@ -10,41 +7,61 @@ SERVICE_TT_VIEWS = "16272"
 SERVICE_IG_VIEWS = "16143"
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0",
-    "Accept": "application/json",
-    "Content-Type": "application/x-www-form-urlencoded"
+    "User-Agent":"Mozilla/5.0",
+    "Accept":"application/json",
+    "Content-Type":"application/x-www-form-urlencoded"
 }
 
-def place_views(link, service_id, quantity):
-    data = {
-        "key": API_KEY,
-        "action": "add",
-        "service": service_id,
-        "link": link,
-        "quantity": quantity
-    }
-    r = requests.post(API_URL, data=data, headers=HEADERS, timeout=30)
-    print("Views:", r.json())
+def send_views(link, service, qty):
+    r = requests.post(API_URL, data={
+        "key":API_KEY,
+        "action":"add",
+        "service":service,
+        "link":link,
+        "quantity":qty
+    }, headers=HEADERS)
+    print(r.json())
 
-def run_views():
-    platform = input("Platform (1=TikTok, 2=Instagram): ").strip()
-    service = SERVICE_TT_VIEWS if platform == "1" else SERVICE_IG_VIEWS
+def run():
+    platform = input("1-TikTok 2-Instagram: ").strip()
+    service = SERVICE_TT_VIEWS if platform=="1" else SERVICE_IG_VIEWS
 
-    link = input("Video URL: ").strip()
-    total_views = int(input("Total Views Target: "))
-    min_v, max_v = map(int, input("Views per run (min-max): ").split("-"))
-    delay = int(input("Delay between runs (minutes): ")) * 60
+    link = input("URL: ").strip()
+    total = int(input("Total views: ").strip())
+
+    per_input = input("Views per order: ").strip()
+    try:
+        if "-" in per_input:
+            min_v, max_v = map(int, per_input.split("-"))
+        else:
+            min_v = max_v = int(per_input)
+    except:
+        print("Invalid views per order.")
+        return
+
+    print("Delay unit:")
+    print("1 - Minutes")
+    print("2 - Hours")
+    unit = input("Choose (1 or 2): ").strip()
+    delay_val = float(input("Delay value: ").strip())
+    delay = int(delay_val * (3600 if unit=="2" else 60))
+
+    avg = (min_v + max_v) / 2
+    cycles = math.ceil(total / avg)
+    total_time = cycles * delay
+
+    print("\n===== ORDER ESTIMATION =====")
+    print(f"Estimated views per order: {min_v}-{max_v}")
+    print(f"Estimated cycles needed: {cycles}")
+    print(f"Estimated time: {total_time//3600}h {(total_time%3600)//60}m")
+    print("===========================\n")
 
     sent = 0
-    while sent < total_views:
-        views = min(random.randint(min_v, max_v), total_views - sent)
-        print(f"Sending {views} views | Progress {sent + views}/{total_views}")
-        place_views(link, service, views)
-        sent += views
-        if sent < total_views:
-            time.sleep(delay)
+    while sent < total:
+        q = min(random.randint(min_v, max_v), total - sent)
+        print(f"Sending {q} views | Progress {sent+q}/{total}")
+        send_views(link, service, q)
+        sent += q
+        time.sleep(delay)
 
-    print("Views target completed.")
-
-if __name__ == "__main__":
-    run_views()
+run()
