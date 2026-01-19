@@ -15,7 +15,7 @@ SERVICE_ID_COMMENTS = "00000000000"
 
 # ===== INSTAGRAM SERVICES =====
 SERVICE_ID_IG_VIEWS = "16143"
-SERVICE_ID_IG_LIKES = "16497"
+SERVICE_ID_IG_LIKES = "16267"
 SERVICE_ID_IG_COMMENTS = ""  # comments disabled safely
 
 # ===== RATIOS =====
@@ -221,4 +221,5 @@ def run_bot():
 
 if __name__ == "__main__":
     run_bot()
+
 
